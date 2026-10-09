@@ -127,7 +127,7 @@ internal fun findProxyHistoryMatch(
 
         api
             .proxy()
-            .let { com.six2dez.burp.aiagent.compat.Compat.convertList(it) } ?: emptyList()
+            .history()
             .firstOrNull { entry ->
                 val entryUrl = entry.request()?.url() ?: return@firstOrNull false
                 val entryUri = runCatching { java.net.URI(entryUrl) }.getOrNull() ?: return@firstOrNull false

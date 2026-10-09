@@ -723,7 +723,7 @@ object McpToolExecutor {
                             val input = decode<GetProxyHttpHistory>(normalizedArgs)
                             ensureAllowedProxyHistoryCount(input.count, context.proxyHistoryMaxItemsPerRequest)
                             val includeRaw = context.allowUnpreprocessedProxyHistory && input.includeUnpreprocessedResponse
-                            val items = com.six2dez.burp.aiagent.compat.Compat.convertList(api.proxy().history()) ?: emptyList()
+                            val items = api.proxy().history()
                             val preprocess =
                                 context.responsePreprocessorSettings().copy(
                                     preprocessProxyHistory = !includeRaw,
@@ -805,7 +805,7 @@ object McpToolExecutor {
                             // 07-03 D-03: per-call scopeOnly retained as override; OR'd with global.
                             val effectiveScopeOnly = input.scopeOnly || context.scopeOnly
                             val matches = mutableListOf<String>()
-                            com.six2dez.burp.aiagent.compat.Compat.convertList(api.proxy().history())?.forEach { item ->
+                            api.proxy().history().forEach { item ->
                                 val url = item.request()?.url() ?: return@forEach
                                 if (effectiveScopeOnly && !api.scope().isInScope(url)) return@forEach
                                 val response = item.response()?.toString().orEmpty()
@@ -984,9 +984,12 @@ object McpToolExecutor {
                                 context.passiveScanner
                                     ?: return@runTool "Passive scanner not available."
 
-                            @Suppress("UNCHECKED_CAST")
+                            // CAPTAIN PATCH 2026-10-09: on Burp 2026.9+ history() entries are
+                            // ProxyHttpRequestResponse which do not extend HttpRequestResponse;
+                            // the old unchecked cast below exploded with ClassCastException.
                             val allHistory: List<burp.api.montoya.http.message.HttpRequestResponse> =
-                                com.six2dez.burp.aiagent.compat.Compat.convertList(api.proxy().history()) as List<burp.api.montoya.http.message.HttpRequestResponse>
+                                com.six2dez.burp.aiagent.compat.Compat.convertList(api.proxy().history())
+                                    ?: emptyList()
                             val filtered =
                                 if (input.siteMapUrl != null) {
                                     allHistory.filter { reqRes ->

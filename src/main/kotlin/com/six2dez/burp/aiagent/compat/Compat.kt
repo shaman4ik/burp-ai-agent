@@ -17,7 +17,7 @@ import burp.api.montoya.http.message.responses.HttpResponse
  */
 object Compat {
     fun convertList(history: List<*>?): List<HttpRequestResponse>? =
-        history?.map { convertOne(it) }
+        history?.mapNotNull { convertOne(it) }
 
     fun convertOne(entry: Any?): HttpRequestResponse? {
         if (entry == null) return null

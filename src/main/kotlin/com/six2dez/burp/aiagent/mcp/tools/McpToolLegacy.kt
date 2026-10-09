@@ -617,7 +617,7 @@ internal fun Server.registerToolsLegacy(
     ) {
         ensureAllowedProxyHistoryCount(count, context.proxyHistoryMaxItemsPerRequest)
         val includeRaw = context.allowUnpreprocessedProxyHistory && includeUnpreprocessedResponse
-        val items = com.six2dez.burp.aiagent.compat.Compat.convertList(api.proxy().history()) ?: emptyList()
+        val items = api.proxy().history()
         val seq =
             orderedProxyHistory(items, context) { it.request()?.toString().orEmpty() }
                 .let { s -> if (listenerPort != null) s.filter { it.listenerPort() == listenerPort } else s }
@@ -684,7 +684,7 @@ internal fun Server.registerToolsLegacy(
     ) {
         val compiledRegex = Pattern.compile(regex)
         val matches = mutableListOf<String>()
-        com.six2dez.burp.aiagent.compat.Compat.convertList(api.proxy().history())?.forEach { item ->
+        api.proxy().history().forEach { item ->
             val url = item.request()?.url() ?: return@forEach
             if (scopeOnly && !api.scope().isInScope(url)) return@forEach
             val response = item.response()?.toString().orEmpty()
