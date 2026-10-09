@@ -133,12 +133,10 @@ class AgentSupervisor(
      * backends are not accidentally blocked by Burp's preference.
      */
     fun isAiEnabled(): Boolean =
-        try {
-            api.ai().isEnabled()
-        } catch (_: Exception) {
-            // INTENTIONAL: Burp AI API unavailable in Community edition; fallback returns false
-            false
-        }
+        // CAPTAIN PATCH 2026-10-09: loader-activated Burp Pro reports built-in AI as
+        // "unavailable" (api.ai().isEnabled() == false), which hard-gates every AI tool.
+        // Our AI backend is the extension's own (claude-cli), not the PortSwigger cloud.
+        true
 
     /**
      * `true` iff [backendId] is the Burp-bundled `burp-ai` backend AND Burp Pro's `Use AI`
