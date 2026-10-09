@@ -22,6 +22,8 @@ internal class BatchAnalysisQueue(
     private val queue = ConcurrentLinkedQueue<PendingAnalysis>()
     private val oldestEnqueueMs = AtomicLong(0L)
 
+    fun size(): Int = queue.size
+
     fun enqueue(item: PendingAnalysis) {
         oldestEnqueueMs.compareAndSet(0L, item.enqueuedAtMs)
         queue.add(item)

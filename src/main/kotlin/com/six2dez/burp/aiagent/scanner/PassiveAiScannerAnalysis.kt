@@ -166,6 +166,7 @@ internal fun PassiveAiScanner.analyzeManually(requestResponse: HttpRequestRespon
         doAnalysis(requestResponse)
     } catch (e: Exception) {
         api.logging().logToError("[PassiveAiScanner] Manual scan error: ${e.message}")
+        audit.logEvent("passive_ai_manual_error", mapOf("error" to (e.message ?: e.javaClass.name)))
     }
 }
 
@@ -418,6 +419,7 @@ internal fun PassiveAiScanner.doAnalysis(requestResponse: HttpRequestResponse) {
         // Batch mode: enqueue and flush when ready
         val batchSize = settings.passiveAiBatchSize.coerceIn(1, 5)
         if (batchSize > 1) {
+            audit.logEvent("passive_ai_enqueued", mapOf("queueSize" to batchQueue.size().toString()))
             batchQueue.enqueue(
                 PendingAnalysis(
                     metadata = safeMetadataText,
