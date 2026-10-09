@@ -68,7 +68,9 @@ internal fun PassiveAiScanner.ensureBackendRunning(settings: AgentSettings): Boo
     val currentBackend = currentStatus.backendId
 
     // Reuse only when the running backend matches the scanner target backend.
+    api.logging().logToOutput("[CAPTAIN] ensure: target=$targetBackend cur=$currentBackend sid=$currentSessionId state=${currentStatus.state}")
     if (currentSessionId != null && currentBackend == targetBackend) {
+        api.logging().logToOutput("[CAPTAIN] ensure: REUSE session")
         return true
     }
 
@@ -82,9 +84,11 @@ internal fun PassiveAiScanner.ensureBackendRunning(settings: AgentSettings): Boo
             return true
         }
         api.logging().logToError("[PassiveAiScanner] Backend started but session did not become ready in time")
+        api.logging().logToOutput("[CAPTAIN] ensure: started but NOT ready")
     } else {
         val error = supervisor.lastStartError()
         api.logging().logToError("[PassiveAiScanner] Failed to start backend: $error")
+        api.logging().logToOutput("[CAPTAIN] ensure: startOrAttach FAILED: $error")
     }
 
     return supervisor.currentSessionId() != null && supervisor.status().backendId == targetBackend
@@ -728,6 +732,7 @@ internal fun PassiveAiScanner.sendSingleAnalysis(
     )
 
     val completed = completionLatch.await(Defaults.PASSIVE_SCAN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+    api.logging().logToOutput("[CAPTAIN] sendSingle: completed=$completed err=${errorRef.get()} bufferLen=${responseBuffer.length}")
     requestsAnalyzed.incrementAndGet()
     lastAnalysisTime.set(System.currentTimeMillis())
 
