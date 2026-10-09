@@ -211,21 +211,25 @@ internal fun PassiveAiScanner.doAnalysis(requestResponse: HttpRequestResponse) {
 
         if (shouldSkipAiAfterLocalFindings(localFindings, request, requestBodyRaw)) {
             requestsAnalyzed.incrementAndGet()
+            audit.logEvent("passive_ai_skip", mapOf("reason" to "ai_after_local_findings"))
             lastAnalysisTime.set(System.currentTimeMillis())
             return
         }
         if (shouldSkipUninterestingTraffic(request, response, responseBodyRaw)) {
             requestsAnalyzed.incrementAndGet()
+            audit.logEvent("passive_ai_skip", mapOf("reason" to "uninteresting_traffic"))
             lastAnalysisTime.set(System.currentTimeMillis())
             return
         }
         if (shouldSkipRecentlyAnalyzedEndpoint(request)) {
             requestsAnalyzed.incrementAndGet()
+            audit.logEvent("passive_ai_skip", mapOf("reason" to "recently_analyzed_endpoint", "url" to request.url()))
             lastAnalysisTime.set(System.currentTimeMillis())
             return
         }
         if (shouldSkipKnownResponseFingerprint(request, response, responseBodyRaw)) {
             requestsAnalyzed.incrementAndGet()
+            audit.logEvent("passive_ai_skip", mapOf("reason" to "known_response_fingerprint"))
             lastAnalysisTime.set(System.currentTimeMillis())
             return
         }
@@ -233,6 +237,7 @@ internal fun PassiveAiScanner.doAnalysis(requestResponse: HttpRequestResponse) {
         // Ensure backend is running for AI analysis
         if (!ensureBackendRunning(settings)) {
             api.logging().logToError("[PassiveAiScanner] No AI backend available - skipping analysis")
+            audit.logEvent("passive_ai_skip", mapOf("reason" to "no_backend", "url" to request.url()))
             return
         }
 
@@ -240,6 +245,7 @@ internal fun PassiveAiScanner.doAnalysis(requestResponse: HttpRequestResponse) {
         val backoffUntil = aiBackoffUntilMs.get()
         if (backoffUntil > nowMs) {
             maybeLogBackoff(nowMs, backoffUntil)
+            audit.logEvent("passive_ai_skip", mapOf("reason" to "ai_backoff"))
             return
         }
 
