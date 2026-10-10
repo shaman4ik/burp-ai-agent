@@ -314,7 +314,7 @@ class ExternalMcpClientManager(
                 ?: return wrapWithTrustBoundary(serverName, "Error: server '$serverName' not connected")
 
         return try {
-            val callResult = client.callTool(toolName, args, false, null)
+            val callResult = client.callTool(toolName, args, emptyMap(), false, null)
             val rawText =
                 callResult
                     ?.content

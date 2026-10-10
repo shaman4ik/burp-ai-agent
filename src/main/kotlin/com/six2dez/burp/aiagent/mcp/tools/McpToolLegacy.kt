@@ -382,7 +382,7 @@ internal fun Server.registerToolsLegacy(
                         name = cookie.name(),
                         value = value,
                         domain = safeDomain,
-                        path = cookie.path(),
+                        path = runCatching { cookie.path() }.getOrNull() ?: "",
                         expiresAt = cookie.expiration().map { it.toString() }.orElse(null),
                     )
                 }.toList()
