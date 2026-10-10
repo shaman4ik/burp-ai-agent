@@ -34,7 +34,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.4.0")
 
     // MCP Server (Ktor + MCP SDK)
-    implementation("io.modelcontextprotocol:kotlin-sdk:0.5.0")
+    implementation("io.modelcontextprotocol:kotlin-sdk:0.6.1")
     implementation("io.ktor:ktor-server-core:3.1.3")
     implementation("io.ktor:ktor-server-netty:3.1.3")
     implementation("io.ktor:ktor-server-cors:3.1.3")

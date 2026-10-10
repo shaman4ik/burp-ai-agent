@@ -524,18 +524,18 @@ object McpToolExecutor {
                                     }.toList()
                             toolJson.encodeToString(results)
                         }
-                        "project_options_get" -> api.burpSuite().exportProjectOptionsAsJson()
-                        "user_options_get" -> api.burpSuite().exportUserOptionsAsJson()
+                        "project_options_get" -> McpOptionCallGuards.exportProjectOptions(api)
+                        "user_options_get" -> McpOptionCallGuards.exportUserOptions(api)
                         "project_options_set" -> {
                             val input = decode<SetProjectOptions>(normalizedArgs)
                             api.logging().logToOutput("Setting project-level configuration via MCP.")
-                            api.burpSuite().importProjectOptionsFromJson(input.json)
+                            McpOptionCallGuards.importProjectOptions(api, input.json)
                             "Project configuration has been applied"
                         }
                         "user_options_set" -> {
                             val input = decode<SetUserOptions>(normalizedArgs)
                             api.logging().logToOutput("Setting user-level configuration via MCP.")
-                            api.burpSuite().importUserOptionsFromJson(input.json)
+                            McpOptionCallGuards.importUserOptions(api, input.json)
                             "User configuration has been applied"
                         }
                         "collaborator_generate" -> {

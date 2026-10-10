@@ -26,6 +26,32 @@ import kotlinx.serialization.encodeToString
 import java.security.MessageDigest
 import java.util.regex.Pattern
 
+/**
+ * Runs a Montoya call that may require the Swing Event Dispatch Thread (EDT) on the EDT,
+ * with a hard timeout so a blocked call surfaces as an MCP error instead of hanging forever.
+ * Burp 2026.x deadlocks exportProjectOptionsAsJson & friends when invoked from a Netty/Ktor worker.
+ */
+private fun <T> runOnEdtWithTimeout(seconds: Long, label: String, block: () -> T): T {
+    val result = arrayOfNulls<Any?>(1)
+    val error = arrayOfNulls<Throwable>(1)
+    val latch = java.util.concurrent.CountDownLatch(1)
+    javax.swing.SwingUtilities.invokeLater {
+        try {
+            result[0] = block()
+        } catch (t: Throwable) {
+            error[0] = t
+        } finally {
+            latch.countDown()
+        }
+    }
+    if (!latch.await(seconds, java.util.concurrent.TimeUnit.SECONDS)) {
+        throw IllegalStateException("$label timed out after ${seconds}s on EDT")
+    }
+    error[0]?.let { throw it }
+    @Suppress("UNCHECKED_CAST")
+    return result[0] as T
+}
+
 @Suppress("unused")
 internal fun Server.registerToolsLegacy(
     api: MontoyaApi,
@@ -368,7 +394,7 @@ internal fun Server.registerToolsLegacy(
         "Outputs current project-level configuration in JSON format. You can use this to determine the schema for available config options.",
         context,
     ) {
-        api.burpSuite().exportProjectOptionsAsJson()
+        runOnEdtWithTimeout(15, "project_options_get") { api.burpSuite().exportProjectOptionsAsJson() }
     }
 
     mcpTool(
@@ -376,7 +402,7 @@ internal fun Server.registerToolsLegacy(
         "Outputs current user-level configuration in JSON format. You can use this to determine the schema for available config options.",
         context,
     ) {
-        api.burpSuite().exportUserOptionsAsJson()
+        runOnEdtWithTimeout(15, "user_options_get") { api.burpSuite().exportUserOptionsAsJson() }
     }
 
     mcpTool<SetProjectOptions>(
@@ -385,7 +411,7 @@ internal fun Server.registerToolsLegacy(
         toolName = "project_options_set",
     ) {
         api.logging().logToOutput("Setting project-level configuration via MCP.")
-        api.burpSuite().importProjectOptionsFromJson(json)
+        runOnEdtWithTimeout(15, "project_options_set") { api.burpSuite().importProjectOptionsFromJson(json) }
         "Project configuration has been applied"
     }
 
@@ -395,7 +421,7 @@ internal fun Server.registerToolsLegacy(
         toolName = "user_options_set",
     ) {
         api.logging().logToOutput("Setting user-level configuration via MCP.")
-        api.burpSuite().importUserOptionsFromJson(json)
+        runOnEdtWithTimeout(15, "user_options_set") { api.burpSuite().importUserOptionsFromJson(json) }
         "User configuration has been applied"
     }
 
