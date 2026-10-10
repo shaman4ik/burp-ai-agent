@@ -26,11 +26,12 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import io.modelcontextprotocol.kotlin.sdk.Implementation
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
+import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.server.mcp
+import io.modelcontextprotocol.kotlin.sdk.server.mcpStreamableHttp
+import kotlin.time.Duration.Companion.seconds
 import java.net.URI
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -241,7 +242,23 @@ class KtorMcpServerManager(
                         // now live in McpAccessControlPlugin.kt, whose onCall attaches to the
                         // Plugins phase and therefore cannot be outrun by routing.
 
-                        mcp {
+                        // Streamable HTTP (spec 2025-11-25): single /mcp endpoint for POST +
+                        // optional GET stream. Replaces the legacy SSE pair (/sse + /message) whose
+                        // idle sessions died silently after ~180s: the socket closed, the session
+                        // stayed in the map, POSTs were accepted with 202 but the CallToolResult
+                        // never reached a live stream and clients waited forever. Streamable
+                        // transports clean up dead sessions, and the 30s heartbeat keeps the GET
+                        // stream alive across quiet periods.
+                        // DNS-rebinding protection is OFF here because McpAccessControl (Plugins
+                        // phase) already gates every route by Host/Origin/token — the SDK's own
+                        // route-local check would only duplicate it and reject proxied Hosts.
+                        mcpStreamableHttp(
+                            path = "/mcp",
+                            enableDnsRebindingProtection = false,
+                            sseHeartbeatConfig = {
+                                period = 30.seconds
+                            },
+                        ) {
                             mcpServer
                         }
 

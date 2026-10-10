@@ -6,8 +6,8 @@ import com.six2dez.burp.aiagent.config.McpSettings
 import com.six2dez.burp.aiagent.mcp.tools.ResponsePreprocessorSettings
 import com.six2dez.burp.aiagent.mcp.tools.registerTools
 import com.six2dez.burp.aiagent.redact.PrivacyMode
-import io.modelcontextprotocol.kotlin.sdk.Implementation
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
+import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
@@ -68,8 +68,8 @@ class McpStdioBridge(
         scope = newScope
         job =
             newScope.launch {
-                mcpServer.connect(stdioTransport)
-                stdioTransport.start()
+                // 0.15: per-connection sessions; createSession wires and starts reading.
+                mcpServer.createSession(stdioTransport)
             }
 
         api.logging().logToOutput("MCP stdio bridge started.")

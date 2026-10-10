@@ -4,10 +4,12 @@ import com.six2dez.burp.aiagent.audit.AuditLogger
 import com.six2dez.burp.aiagent.audit.Hashing
 import com.six2dez.burp.aiagent.mcp.McpToolContext
 import com.six2dez.burp.aiagent.mcp.schema.asInputSchema
-import io.modelcontextprotocol.kotlin.sdk.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.TextContent
-import io.modelcontextprotocol.kotlin.sdk.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
@@ -40,7 +42,7 @@ inline fun <reified I : Any> Server.mcpTool(
                 val input =
                     json.decodeFromJsonElement(
                         I::class.serializer(),
-                        request.arguments,
+                        request.arguments ?: JsonObject(emptyMap()),
                     )
                 context.redactIfNeeded(execute(input))
             }
@@ -72,7 +74,7 @@ inline fun Server.mcpTool(
     addTool(
         name = name,
         description = description,
-        inputSchema = Tool.Input(),
+        inputSchema = ToolSchema(),
         handler = {
             runTool(context, name, null) {
                 context.redactIfNeeded(execute())

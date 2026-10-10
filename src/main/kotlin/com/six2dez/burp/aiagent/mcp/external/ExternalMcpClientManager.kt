@@ -5,9 +5,9 @@ import com.six2dez.burp.aiagent.util.SsrfGuard
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.sse.SSE
-import io.modelcontextprotocol.kotlin.sdk.Implementation
-import io.modelcontextprotocol.kotlin.sdk.ListToolsRequest
-import io.modelcontextprotocol.kotlin.sdk.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.Implementation
+import io.modelcontextprotocol.kotlin.sdk.types.ListToolsRequest
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import io.modelcontextprotocol.kotlin.sdk.client.ClientOptions
 import io.modelcontextprotocol.kotlin.sdk.client.SseClientTransport
@@ -225,7 +225,7 @@ class ExternalMcpClientManager(
 
             client.connect(transport)
 
-            val toolsResult = client.listTools(ListToolsRequest(), null)
+            val toolsResult = client.listTools(ListToolsRequest())
             val descriptors =
                 toolsResult
                     ?.tools
@@ -314,12 +314,12 @@ class ExternalMcpClientManager(
                 ?: return wrapWithTrustBoundary(serverName, "Error: server '$serverName' not connected")
 
         return try {
-            val callResult = client.callTool(toolName, args, false, null)
+            val callResult = client.callTool(toolName, args)
             val rawText =
                 callResult
                     ?.content
                     ?.filterIsInstance<TextContent>()
-                    ?.joinToString("\n") { it.text.orEmpty() }
+                    ?.joinToString("\n") { it.text }
                     .orEmpty()
 
             val wrapped = wrapWithTrustBoundary(serverName, rawText)

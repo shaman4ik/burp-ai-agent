@@ -2,7 +2,8 @@ package com.six2dez.burp.aiagent.ui.components
 
 import com.six2dez.burp.aiagent.mcp.McpToolDescriptor
 import com.six2dez.burp.aiagent.ui.UiTheme
-import io.modelcontextprotocol.kotlin.sdk.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -35,7 +36,7 @@ import javax.swing.border.EmptyBorder
 class ToolInvocationDialog(
     owner: Window?,
     tools: List<McpToolDescriptor>,
-    private val schemaProvider: (String) -> Tool.Input,
+    private val schemaProvider: (String) -> ToolSchema,
 ) : JDialog(owner, "Invoke MCP Tool", ModalityType.APPLICATION_MODAL) {
     data class Invocation(
         val toolId: String,
@@ -141,7 +142,7 @@ class ToolInvocationDialog(
     private val descriptionLabel = JLabel(" ")
     private val fieldsPanel = JPanel(GridBagLayout())
     private val fieldEditors = linkedMapOf<String, FieldEditor>()
-    private var selectedSchema: Tool.Input = Tool.Input()
+    private var selectedSchema: ToolSchema = ToolSchema()
     private var invocation: Invocation? = null
 
     init {
@@ -291,7 +292,8 @@ class ToolInvocationDialog(
         val required = selectedSchema.required?.toSet().orEmpty()
         val properties =
             selectedSchema.properties
-                .entries
+                ?.entries
+                .orEmpty()
                 .sortedBy { it.key }
 
         if (properties.isEmpty()) {

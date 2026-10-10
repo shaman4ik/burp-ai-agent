@@ -26,9 +26,10 @@ import com.six2dez.burp.aiagent.mcp.schema.toSiteMapEntry
 import com.six2dez.burp.aiagent.redact.PrivacyMode
 import com.six2dez.burp.aiagent.redact.Redaction
 import com.six2dez.burp.aiagent.redact.RedactionPolicy
-import io.modelcontextprotocol.kotlin.sdk.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.TextContent
-import io.modelcontextprotocol.kotlin.sdk.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.Tool
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -1285,14 +1286,14 @@ object McpToolExecutor {
     fun inputSchema(
         toolName: String,
         context: McpToolContext? = null,
-    ): Tool.Input {
+    ): ToolSchema {
         val allowUnpreprocessed = context?.allowUnpreprocessedProxyHistory ?: true
         return when (toolName) {
             "status",
             "editor_get",
             "project_options_get",
             "user_options_get",
-            -> Tool.Input()
+            -> ToolSchema()
             "http1_request" -> SendHttp1Request::class.asInputSchema()
             "http2_request" -> SendHttp2Request::class.asInputSchema()
             "repeater_tab" -> CreateRepeaterTab::class.asInputSchema()
@@ -1359,8 +1360,8 @@ object McpToolExecutor {
             "ai_findings_recent" -> AiFindingsRecentInput::class.asInputSchema()
             "redact_preview" -> RedactPreviewInput::class.asInputSchema()
             "ai_audit_query" -> AiAuditQueryInput::class.asInputSchema()
-            "ai_backends_list" -> Tool.Input()
-            else -> Tool.Input()
+            "ai_backends_list" -> ToolSchema()
+            else -> ToolSchema()
         }
     }
 

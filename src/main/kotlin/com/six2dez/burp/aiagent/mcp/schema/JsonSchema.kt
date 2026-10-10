@@ -1,6 +1,7 @@
 package com.six2dez.burp.aiagent.mcp.schema
 
-import io.modelcontextprotocol.kotlin.sdk.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.Tool
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -45,7 +46,7 @@ fun getJsonSchemaForProperty(kType: kotlin.reflect.KType): JsonElement =
             JsonObject(mapOf("type" to JsonPrimitive("object")))
     }
 
-fun KClass<*>.asInputSchema(): Tool.Input {
+fun KClass<*>.asInputSchema(): ToolSchema {
     val properties = mutableMapOf<String, JsonElement>()
     val required = mutableListOf<String>()
 
@@ -56,7 +57,7 @@ fun KClass<*>.asInputSchema(): Tool.Input {
         }
     }
 
-    return Tool.Input(
+    return ToolSchema(
         properties = JsonObject(properties),
         required = required,
     )

@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
-    kotlin("jvm") version "2.1.21"
-    kotlin("plugin.serialization") version "2.1.21"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.serialization") version "2.3.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.cyclonedx.bom") version "1.10.0"
@@ -17,6 +17,7 @@ group = "com.six2dez.burp"
 version = "1.0.0"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://www.jetbrains.com/intellij-repository/releases")
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
@@ -34,16 +35,16 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.4.0")
 
     // MCP Server (Ktor + MCP SDK)
-    implementation("io.modelcontextprotocol:kotlin-sdk:0.6.1")
-    implementation("io.ktor:ktor-server-core:3.1.3")
-    implementation("io.ktor:ktor-server-netty:3.1.3")
-    implementation("io.ktor:ktor-server-cors:3.1.3")
-    implementation("io.ktor:ktor-server-sse:3.1.3")
-    implementation("io.ktor:ktor-server-content-negotiation:3.1.3")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
+    implementation("io.modelcontextprotocol:kotlin-sdk:0.15.0")
+    implementation("io.ktor:ktor-server-core:3.5.2")
+    implementation("io.ktor:ktor-server-netty:3.5.2")
+    implementation("io.ktor:ktor-server-cors:3.5.2")
+    implementation("io.ktor:ktor-server-sse:3.5.2")
+    implementation("io.ktor:ktor-server-content-negotiation:3.5.2")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.2")
     // Phase 16: Ktor CLIENT modules (pin to 3.1.3 to match server-side Ktor family)
-    implementation("io.ktor:ktor-client-core:3.1.3")
-    implementation("io.ktor:ktor-client-cio:3.1.3")
+    implementation("io.ktor:ktor-client-core:3.5.2")
+    implementation("io.ktor:ktor-client-cio:3.5.2")
     // kotlin-logging: transitive via kotlin-sdk:0.5.0 StdioClientTransport; declared explicitly to pin version
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
